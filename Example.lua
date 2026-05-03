@@ -1,6 +1,4 @@
-
--- example script by https://github.com/mstudio45/LinoriaLib/blob/main/Example.lua and modified by deivid
--- You can suggest changes with a pull request or something
+-- idk, try to use this and figure out how the lib works ig?
 
 local repo = "https://raw.githubusercontent.com/uhfork/Obsidian/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
@@ -10,83 +8,64 @@ local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
 local Options = Library.Options
 local Toggles = Library.Toggles
 
-Library.ForceCheckbox = false -- Forces AddToggle to AddCheckbox
-Library.ShowToggleFrameInKeybinds = true -- Make toggle keybinds work inside the keybinds UI (aka adds a toggle to the UI). Good for mobile users (Default value = true)
+Library.ForceCheckbox = false 
+Library.ShowToggleFrameInKeybinds = true
+
+local Loading = Library:CreateLoading({
+    Title = "mspaint",
+    Icon = 95816097006870,
+    TotalSteps = 4
+})
+
+Loading:SetMessage("Initializing...")
+Loading:SetDescription("Waiting for game to load...")
+task.wait(1)
+ 
+Loading:SetCurrentStep(1)
+Loading:SetDescription("Loading configuration...")
+task.wait(1)
+
+Loading:SetCurrentStep(2)
+Loading:ShowSidebarPage(true)
+Loading.Sidebar:AddLabel("User: " .. game.Players.LocalPlayer.Name)
+Loading.Sidebar:AddLabel("Version: v1.0.0")
+task.wait(1)
+ 
+Loading:SetCurrentStep(3)
+Loading:SetDescription("Ready to start!")
+task.wait(1)
+ 
+Loading:SetCurrentStep(4)
+Loading:Continue()
 
 local Window = Library:CreateWindow({
-	-- Set Center to true if you want the menu to appear in the center
-	-- Set AutoShow to true if you want the menu to appear when it is created
-	-- Set Resizable to true if you want to have in-game resizable Window
-	-- Set MobileButtonsSide to "Left" or "Right" if you want the ui toggle & lock buttons to be on the left or right side of the window
-	-- Set ShowCustomCursor to false if you don't want to use the Linoria cursor
-	-- NotifySide = Changes the side of the notifications (Left, Right) (Default value = Left)
-	-- Position and Size are also valid options here
-	-- but you do not need to define them unless you are changing them :)
-
 	Title = "mspaint",
 	Footer = "version: example",
 	Icon = 95816097006870,
+	CornerElements = false,
 	NotifySide = "Right",
 	ShowCustomCursor = true,
 })
 
--- CALLBACK NOTE:
--- Passing in callback functions via the initial element parameters (i.e. Callback = function(Value)...) works
--- HOWEVER, using Toggles/Options.INDEX:OnChanged(function(Value) ... ) is the RECOMMENDED way to do this.
--- I strongly recommend decoupling UI code from logic code. i.e. Create your UI elements FIRST, and THEN setup :OnChanged functions later.
 
--- You do not have to set your tabs & groups up this way, just a prefrence.
--- You can find more icons in https://lucide.dev/
 local Tabs = {
-	-- Creates a new tab titled Main
-	Main = Window:AddTab("Main", "user"),
+	Main = Window:AddTab("Main", "user", "Main features"),
+	SpecialTab = Window:AddSpecialTab("Special Tab", "sparkle"),
 	Key = Window:AddKeyTab("Key System"),
-	["UI Settings"] = Window:AddTab("UI Settings", "settings"),
+	Settings = Window:AddTab("Settings", "settings", "UI settings and configurations"),
 }
 
-
---[[
-Example of how to add a warning box to a tab; the title AND text support rich text formatting.
-
-local UISettingsTab = Tabs["UI Settings"]
-
-UISettingsTab:UpdateWarningBox({
-	Visible = true,
-	Title = "Warning",
-	Text = "This is a warning box!",
-})
-
---]]
-
--- Groupbox and Tabbox inherit the same functions
--- except Tabboxes you have to call the functions on a tab (Tabbox:AddTab(Name))
 local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Groupbox", "boxes")
 
--- We can also get our Main tab via the following code:
--- local LeftGroupBox = Window.Tabs.Main:AddLeftGroupbox("Groupbox", "boxes")
-
--- Tabboxes are a tiny bit different, but here's a basic example:
---[[
-
-local TabBox = Tabs.Main:AddLeftTabbox() -- Add Tabbox on left side
-
-local Tab1 = TabBox:AddTab("Tab 1")
-local Tab2 = TabBox:AddTab("Tab 2")
-
--- You can now call AddToggle, etc on the tabs you added to the Tabbox
-]]
-
--- Groupbox:AddToggle
--- Arguments: Index, Options
 LeftGroupBox:AddToggle("MyToggle", {
 	Text = "This is a toggle",
-	Tooltip = "This is a tooltip", -- Information shown when you hover over the toggle
-	DisabledTooltip = "I am disabled!", -- Information shown when you hover over the toggle while it's disabled
+	Tooltip = "This is a tooltip",
+	DisabledTooltip = "I am disabled!",
 
-	Default = true, -- Default value (true / false)
-	Disabled = false, -- Will disable the toggle (true / false)
-	Visible = true, -- Will make the toggle invisible (true / false)
-	Risky = false, -- Makes the text red (the color can be changed using Library.Scheme.Red) (Default value = false)
+	Default = true,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
 
 	Callback = function(Value)
 		print("[cb] MyToggle changed to:", Value)
@@ -94,8 +73,8 @@ LeftGroupBox:AddToggle("MyToggle", {
 })
 	:AddColorPicker("ColorPicker1", {
 		Default = Color3.new(1, 0, 0),
-		Title = "Some color1", -- Optional. Allows you to have a custom color picker title (when you open it)
-		Transparency = 0, -- Optional. Enables transparency changing for this color picker (leave as nil to disable)
+		Title = "Some color1",
+		Transparency = 0,
 
 		Callback = function(Value)
 			print("[cb] Color changed!", Value)
@@ -110,31 +89,21 @@ LeftGroupBox:AddToggle("MyToggle", {
 		end,
 	})
 
--- Fetching a toggle object for later use:
--- Toggles.MyToggle.Value
-
--- Toggles is a table added to getgenv() by the library
--- You index Toggles with the specified index, in this case it is 'MyToggle'
--- To get the state of the toggle you do toggle.Value
-
--- Calls the passed function when the toggle is updated
 Toggles.MyToggle:OnChanged(function()
-	-- here we get our toggle object & then get its value
 	print("MyToggle changed to:", Toggles.MyToggle.Value)
 end)
 
--- This should print to the console: "My toggle state changed! New value: false"
 Toggles.MyToggle:SetValue(false)
 
 LeftGroupBox:AddCheckbox("MyCheckbox", {
 	Text = "This is a checkbox",
-	Tooltip = "This is a tooltip", -- Information shown when you hover over the toggle
-	DisabledTooltip = "I am disabled!", -- Information shown when you hover over the toggle while it's disabled
+	Tooltip = "This is a tooltip",
+	DisabledTooltip = "I am disabled!",
 
-	Default = true, -- Default value (true / false)
-	Disabled = false, -- Will disable the toggle (true / false)
-	Visible = true, -- Will make the toggle invisible (true / false)
-	Risky = false, -- Makes the text red (the color can be changed using Library.Scheme.Red) (Default value = false)
+	Default = true,
+	Disabled = false,
+	Visible = true, 
+	Risky = false,
 
 	Callback = function(Value)
 		print("[cb] MyCheckbox changed to:", Value)
@@ -144,22 +113,6 @@ LeftGroupBox:AddCheckbox("MyCheckbox", {
 Toggles.MyCheckbox:OnChanged(function()
 	print("MyCheckbox changed to:", Toggles.MyCheckbox.Value)
 end)
-
--- 1/15/23
--- Deprecated old way of creating buttons in favor of using a table
--- Added DoubleClick button functionality
-
---[[
-	Groupbox:AddButton
-	Arguments: {
-		Text = string,
-		Func = function,
-		DoubleClick = boolean
-		Tooltip = string,
-	}
-
-	You can call :AddButton on a button to add a SubButton!
-]]
 
 local MyButton = LeftGroupBox:AddButton({
 	Text = "Button",
@@ -171,91 +124,64 @@ local MyButton = LeftGroupBox:AddButton({
 	Tooltip = "This is the main button",
 	DisabledTooltip = "I am disabled!",
 
-	Disabled = false, -- Will disable the button (true / false)
-	Visible = true, -- Will make the button invisible (true / false)
-	Risky = false, -- Makes the text red (the color can be changed using Library.Scheme.Red) (Default value = false)
+	Disabled = false,
+	Visible = true,
+	Risky = false,
 })
 
-local MyButton2 = MyButton:AddButton({
+MyButton:AddButton({
 	Text = "Sub button",
 	Func = function()
 		print("You clicked a sub button!")
 	end,
-	DoubleClick = true, -- You will have to click this button twice to trigger the callback
+	DoubleClick = true,
 	Tooltip = "This is the sub button",
 	DisabledTooltip = "I am disabled!",
 })
 
-local MyDisabledButton = LeftGroupBox:AddButton({
+LeftGroupBox:AddButton({
 	Text = "Disabled Button",
 	Func = function()
 		print("You somehow clicked a disabled button!")
 	end,
 	DoubleClick = false,
 	Tooltip = "This is a disabled button",
-	DisabledTooltip = "I am disabled!", -- Information shown when you hover over the button while it's disabled
+	DisabledTooltip = "I am disabled!",
 	Disabled = true,
 })
 
---[[
-	NOTE: You can chain the button methods!
-	EXAMPLE:
+LeftGroupBox:AddButton({
+	Text = "Click me!",
+	Func = function()
+		Library:Notify({
+			Title = "Button clicked!",
+			Description = "You clicked the button!",
+			Icon = "circle-check",
+			BigIcon = 95816097006870,
+			IconColor = Color3.new(1, 1, 1),
+			Time = 2,
+		})
+	end,
+	DoubleClick = false,
+	Tooltip = "Click me!",
+	DisabledTooltip = "I am disabled!",
+})
 
-	LeftGroupBox:AddButton({ Text = 'Kill all', Func = Functions.KillAll, Tooltip = 'This will kill everyone in the game!' })
-		:AddButton({ Text = 'Kick all', Func = Functions.KickAll, Tooltip = 'This will kick everyone in the game!' })
-]]
-
--- Groupbox:AddLabel
--- Arguments: Text, DoesWrap, Idx
--- Arguments: Idx, Options
 LeftGroupBox:AddLabel("This is a label")
 LeftGroupBox:AddLabel("This is a label\n\nwhich wraps its text!", true)
 LeftGroupBox:AddLabel("This is a label exposed to Labels", true, "TestLabel")
 LeftGroupBox:AddLabel("SecondTestLabel", {
 	Text = "This is a label made with table options and an index",
-	DoesWrap = true, -- Defaults to false
+	DoesWrap = true,
 })
 
 LeftGroupBox:AddLabel("SecondTestLabel", {
 	Text = "This is a label that doesn't wrap it's own text",
-	DoesWrap = false, -- Defaults to false
+	DoesWrap = false,
 })
 
--- Options is a table added to getgenv() by the library
--- You index Options with the specified index, in this case it is 'SecondTestLabel' & 'TestLabel'
--- To set the text of the label you do label:SetText
-
--- Options.TestLabel:SetText("first changed!")
--- Options.SecondTestLabel:SetText("second changed!")
-
--- Groupbox:AddDivider
--- Arguments: None
 LeftGroupBox:AddDivider()
 
---[[
-	Groupbox:AddSlider
-	Arguments: Idx, SliderOptions
-
-	SliderOptions: {
-		Text = string,
-		Default = number,
-		Min = number,
-		Max = number,
-		Suffix = string,
-		Rounding = number,
-		Compact = boolean,
-		HideMax = boolean,
-	}
-
-	Text, Default, Min, Max, Rounding must be specified.
-	Suffix is optional.
-	Rounding is the number of decimal places for precision.
-
-	Compact will hide the title label of the Slider
-
-	HideMax will only display the value instead of the value & max value of the slider
-	Compact will do the same thing
-]]
 LeftGroupBox:AddSlider("MySlider", {
 	Text = "This is my slider!",
 	Default = 0,
@@ -268,23 +194,17 @@ LeftGroupBox:AddSlider("MySlider", {
 		print("[cb] MySlider was changed! New value:", Value)
 	end,
 
-	Tooltip = "I am a slider!", -- Information shown when you hover over the slider
-	DisabledTooltip = "I am disabled!", -- Information shown when you hover over the slider while it's disabled
+	Tooltip = "I am a slider!",
+	DisabledTooltip = "I am disabled!",
 
-	Disabled = false, -- Will disable the slider (true / false)
-	Visible = true, -- Will make the slider invisible (true / false)
+	Disabled = false,
+	Visible = true,
 })
 
--- Options is a table added to getgenv() by the library
--- You index Options with the specified index, in this case it is 'MySlider'
--- To get the value of the slider you do slider.Value
-
-local Number = Options.MySlider.Value
 Options.MySlider:OnChanged(function()
 	print("MySlider was changed! New value:", Options.MySlider.Value)
 end)
 
--- This should print to the console: "MySlider was changed! New value: 3"
 Options.MySlider:SetValue(3)
 
 LeftGroupBox:AddSlider("MySlider2", {
@@ -298,29 +218,25 @@ LeftGroupBox:AddSlider("MySlider2", {
 	FormatDisplayValue = function(slider, value)
 		if value == slider.Max then return 'Everything' end
 		if value == slider.Min then return 'Nothing' end
-		-- If you return nil, the default formatting will be applied
 	end,
 
-	Tooltip = "I am a slider!", -- Information shown when you hover over the slider
-	DisabledTooltip = "I am disabled!", -- Information shown when you hover over the slider while it's disabled
+	Tooltip = "I am a slider!",
+	DisabledTooltip = "I am disabled!",
 
-	Disabled = false, -- Will disable the slider (true / false)
-	Visible = true, -- Will make the slider invisible (true / false)
+	Disabled = false,
+	Visible = true,
 })
 
--- Groupbox:AddInput
--- Arguments: Idx, Info
 LeftGroupBox:AddInput("MyTextbox", {
 	Default = "My textbox!",
-	Numeric = false, -- true / false, only allows numbers
-	Finished = false, -- true / false, only calls callback when you press enter
-	ClearTextOnFocus = true, -- true / false, if false the text will not clear when textbox focused
+	Numeric = false,
+	Finished = false,
+	ClearTextOnFocus = true,
 
 	Text = "This is a textbox",
-	Tooltip = "This is a tooltip", -- Information shown when you hover over the textbox
+	Tooltip = "This is a tooltip",
 
-	Placeholder = "Placeholder text", -- placeholder text when the box is empty
-	-- MaxLength is also an option which is the max length of the text
+	Placeholder = "Placeholder text",
 
 	Callback = function(Value)
 		print("[cb] Text updated. New text:", Value)
@@ -331,28 +247,29 @@ Options.MyTextbox:OnChanged(function()
 	print("Text updated. New text:", Options.MyTextbox.Value)
 end)
 
--- Groupbox:AddDropdown
--- Arguments: Idx, Info
-
 local DropdownGroupBox = Tabs.Main:AddRightGroupbox("Dropdowns")
 
 DropdownGroupBox:AddDropdown("MyDropdown", {
 	Values = { "This", "is", "a", "dropdown" },
-	Default = 1, -- number index of the value / string
-	Multi = false, -- true / false, allows multiple choices to be selected
+	ValueImages = {
+        ["a"] = "angry",
+    },
+	Default = 1,
+	Multi = false,
+	AllowNull = true,
 
 	Text = "A dropdown",
-	Tooltip = "This is a tooltip", -- Information shown when you hover over the dropdown
-	DisabledTooltip = "I am disabled!", -- Information shown when you hover over the dropdown while it's disabled
+	Tooltip = "This is a tooltip",
+	DisabledTooltip = "I am disabled!",
 
-	Searchable = false, -- true / false, makes the dropdown searchable (great for a long list of values)
+	Searchable = false,
 
 	Callback = function(Value)
 		print("[cb] Dropdown got changed. New value:", Value)
 	end,
 
-	Disabled = false, -- Will disable the dropdown (true / false)
-	Visible = true, -- Will make the dropdown invisible (true / false)
+	Disabled = false,
+	Visible = true,
 })
 
 Options.MyDropdown:OnChanged(function()
@@ -363,68 +280,62 @@ Options.MyDropdown:SetValue("This")
 
 DropdownGroupBox:AddDropdown("MySearchableDropdown", {
 	Values = { "This", "is", "a", "searchable", "dropdown" },
-	Default = 1, -- number index of the value / string
-	Multi = false, -- true / false, allows multiple choices to be selected
+	Default = 1,
+	Multi = false,
 
 	Text = "A searchable dropdown",
-	Tooltip = "This is a tooltip", -- Information shown when you hover over the dropdown
-	DisabledTooltip = "I am disabled!", -- Information shown when you hover over the dropdown while it's disabled
+	Tooltip = "This is a tooltip",
+	DisabledTooltip = "I am disabled!",
 
-	Searchable = true, -- true / false, makes the dropdown searchable (great for a long list of values)
+	Searchable = true,
 
 	Callback = function(Value)
 		print("[cb] Dropdown got changed. New value:", Value)
 	end,
 
-	Disabled = false, -- Will disable the dropdown (true / false)
-	Visible = true, -- Will make the dropdown invisible (true / false)
+	Disabled = false,
+	Visible = true,
 })
 
 DropdownGroupBox:AddDropdown("MyDisplayFormattedDropdown", {
 	Values = { "This", "is", "a", "formatted", "dropdown" },
-	Default = 1, -- number index of the value / string
-	Multi = false, -- true / false, allows multiple choices to be selected
+	Default = 1,
+	Multi = false,
 
 	Text = "A display formatted dropdown",
-	Tooltip = "This is a tooltip", -- Information shown when you hover over the dropdown
-	DisabledTooltip = "I am disabled!", -- Information shown when you hover over the dropdown while it's disabled
+	Tooltip = "This is a tooltip",
+	DisabledTooltip = "I am disabled!",
 
-	FormatDisplayValue = function(Value) -- You can change the display value for any values. The value will be still same, only the UI changes.
+	FormatDisplayValue = function(Value)
 		if Value == "formatted" then
-			return "display formatted" -- formatted -> display formatted but in Options.MyDisplayFormattedDropdown.Value it will still return formatted if its selected.
+			return "display formatted"
 		end
 
 		return Value
 	end,
 
-	Searchable = false, -- true / false, makes the dropdown searchable (great for a long list of values)
+	Searchable = false,
 
 	Callback = function(Value)
 		print("[cb] Display formatted dropdown got changed. New value:", Value)
 	end,
 
-	Disabled = false, -- Will disable the dropdown (true / false)
-	Visible = true, -- Will make the dropdown invisible (true / false)
+	Disabled = false,
+	Visible = true,
 })
 
--- Multi dropdowns
 DropdownGroupBox:AddDropdown("MyMultiDropdown", {
-	-- Default is the numeric index (e.g. "This" would be 1 since it if first in the values list)
-	-- Default also accepts a string as well
-
-	-- Currently you can not set multiple values with a dropdown
-
-	Values = { "This", "is", "a", "dropdown" },
+	Values = { "This", "is", "a", "multi", "dropdown" },
 	Default = 1,
-	Multi = true, -- true / false, allows multiple choices to be selected
+	Multi = true,
 
 	Text = "A multi dropdown",
-	Tooltip = "This is a tooltip", -- Information shown when you hover over the dropdown
+	Tooltip = "This is a tooltip",
 
 	Callback = function(Value)
 		print("[cb] Multi dropdown got changed:")
 		for key, value in next, Options.MyMultiDropdown.Value do
-			print(key, value) -- should print something like This, true
+			print(key, value)
 		end
 	end,
 })
@@ -436,37 +347,37 @@ Options.MyMultiDropdown:SetValue({
 
 DropdownGroupBox:AddDropdown("MyDisabledDropdown", {
 	Values = { "This", "is", "a", "dropdown" },
-	Default = 1, -- number index of the value / string
-	Multi = false, -- true / false, allows multiple choices to be selected
+	Default = 1,
+	Multi = false,
 
 	Text = "A disabled dropdown",
-	Tooltip = "This is a tooltip", -- Information shown when you hover over the dropdown
-	DisabledTooltip = "I am disabled!", -- Information shown when you hover over the dropdown while it's disabled
+	Tooltip = "This is a tooltip",
+	DisabledTooltip = "I am disabled!",
 
 	Callback = function(Value)
 		print("[cb] Disabled dropdown got changed. New value:", Value)
 	end,
 
-	Disabled = true, -- Will disable the dropdown (true / false)
-	Visible = true, -- Will make the dropdown invisible (true / false)
+	Disabled = true,
+	Visible = true,
 })
 
 DropdownGroupBox:AddDropdown("MyDisabledValueDropdown", {
 	Values = { "This", "is", "a", "dropdown", "with", "disabled", "value" },
-	DisabledValues = { "disabled" }, -- Disabled Values that are unclickable
-	Default = 1, -- number index of the value / string
-	Multi = false, -- true / false, allows multiple choices to be selected
+	DisabledValues = { "disabled" },
+	Default = 1,
+	Multi = false,
 
 	Text = "A dropdown with disabled value",
-	Tooltip = "This is a tooltip", -- Information shown when you hover over the dropdown
-	DisabledTooltip = "I am disabled!", -- Information shown when you hover over the dropdown while it's disabled
+	Tooltip = "This is a tooltip",
+	DisabledTooltip = "I am disabled!",
 
 	Callback = function(Value)
 		print("[cb] Dropdown with disabled value got changed. New value:", Value)
 	end,
 
-	Disabled = false, -- Will disable the dropdown (true / false)
-	Visible = true, -- Will make the dropdown invisible (true / false)
+	Disabled = false,
+	Visible = true,
 })
 
 DropdownGroupBox:AddDropdown("MyVeryLongDropdown", {
@@ -491,30 +402,30 @@ DropdownGroupBox:AddDropdown("MyVeryLongDropdown", {
 		"8",
 		"values",
 	},
-	Default = 1, -- number index of the value / string
-	Multi = false, -- true / false, allows multiple choices to be selected
+	Default = 1,
+	Multi = false,
 
-	MaxVisibleDropdownItems = 12, -- Default: 8, allows you to change the size of the dropdown list
-
+	MaxVisibleDropdownItems = 12,
 	Text = "A very long dropdown",
-	Tooltip = "This is a tooltip", -- Information shown when you hover over the dropdown
-	DisabledTooltip = "I am disabled!", -- Information shown when you hover over the dropdown while it's disabled
+	Tooltip = "This is a tooltip",
+	DisabledTooltip = "I am disabled!",
 
-	Searchable = false, -- true / false, makes the dropdown searchable (great for a long list of values)
+	Searchable = false,
 
 	Callback = function(Value)
 		print("[cb] Very long dropdown got changed. New value:", Value)
 	end,
 
-	Disabled = false, -- Will disable the dropdown (true / false)
-	Visible = true, -- Will make the dropdown invisible (true / false)
+	Disabled = false,
+	Visible = true,
 })
 
 DropdownGroupBox:AddDropdown("MyPlayerDropdown", {
 	SpecialType = "Player",
-	ExcludeLocalPlayer = true, -- true / false, excludes the localplayer from the Player type
+	ExcludeLocalPlayer = true,
+	EnablePlayerImages = true,
 	Text = "A player dropdown",
-	Tooltip = "This is a tooltip", -- Information shown when you hover over the dropdown
+	Tooltip = "This is a tooltip",
 
 	Callback = function(Value)
 		print("[cb] Player dropdown got changed:", Value)
@@ -524,22 +435,17 @@ DropdownGroupBox:AddDropdown("MyPlayerDropdown", {
 DropdownGroupBox:AddDropdown("MyTeamDropdown", {
 	SpecialType = "Team",
 	Text = "A team dropdown",
-	Tooltip = "This is a tooltip", -- Information shown when you hover over the dropdown
+	Tooltip = "This is a tooltip",
 
 	Callback = function(Value)
 		print("[cb] Team dropdown got changed:", Value)
 	end,
 })
 
--- Label:AddColorPicker
--- Arguments: Idx, Info
-
--- You can also ColorPicker & KeyPicker to a Toggle as well
-
 LeftGroupBox:AddLabel("Color"):AddColorPicker("ColorPicker", {
-	Default = Color3.new(0, 1, 0), -- Bright green
-	Title = "Some color", -- Optional. Allows you to have a custom color picker title (when you open it)
-	Transparency = 0, -- Optional. Enables transparency changing for this color picker (leave as nil to disable)
+	Default = Color3.new(0, 1, 0),
+	Title = "Some color",
+	Transparency = 0,
 
 	Callback = function(Value)
 		print("[cb] Color changed!", Value)
@@ -553,38 +459,24 @@ end)
 
 Options.ColorPicker:SetValueRGB(Color3.fromRGB(0, 255, 140))
 
--- Label:AddKeyPicker
--- Arguments: Idx, Info
-
 LeftGroupBox:AddLabel("Keybind"):AddKeyPicker("KeyPicker", {
-	-- SyncToggleState only works with toggles.
-	-- It allows you to make a keybind which has its state synced with its parent toggle
-
-	-- Example: Keybind which you use to toggle flyhack, etc.
-	-- Changing the toggle disables the keybind state and toggling the keybind switches the toggle state
-
-	Default = "MB2", -- String as the name of the keybind (MB1, MB2 for mouse buttons)
+	Default = "MB2",
 	SyncToggleState = false,
 
-	-- You can define custom Modes but I have never had a use for it.
-	Mode = "Toggle", -- Modes: Always, Toggle, Hold, Press (example down below)
+	Mode = "Toggle",
 
-	Text = "Auto lockpick safes", -- Text to display in the keybind menu
-	NoUI = false, -- Set to true if you want to hide from the Keybind menu,
+	Text = "Auto lockpick safes",
+	NoUI = false,
 
-	-- Occurs when the keybind is clicked, Value is `true`/`false`
 	Callback = function(Value)
 		print("[cb] Keybind clicked!", Value)
 	end,
 
-	-- Occurs when the keybind itself is changed, `NewKey` is a KeyCode Enum OR a UserInputType Enum, `NewModifiers` is a table with KeyCode Enum(s) or nil
 	ChangedCallback = function(NewKey, NewModifiers)
 		print("[cb] Keybind changed!", NewKey, table.unpack(NewModifiers or {}))
 	end,
 })
 
--- OnClick is only fired when you press the keybind and the mode is Toggle
--- Otherwise, you will have to use Keybind:GetState()
 Options.KeyPicker:OnClick(function()
 	print("Keybind clicked!", Options.KeyPicker:GetState())
 end)
@@ -595,7 +487,6 @@ end)
 
 task.spawn(function()
 	while task.wait(1) do
-		-- example for checking if a keybind is being pressed
 		local state = Options.KeyPicker:GetState()
 		if state then
 			print("KeyPicker is being held down")
@@ -607,53 +498,233 @@ task.spawn(function()
 	end
 end)
 
-Options.KeyPicker:SetValue({ "MB2", "Hold" }) -- Sets keybind to MB2, mode to Hold
-
--- Label:KeyPicker (Press Mode)
+Options.KeyPicker:SetValue({ "MB2", "Hold" })
 
 local KeybindNumber = 0
 
 LeftGroupBox:AddLabel("Press Keybind"):AddKeyPicker("KeyPicker2", {
-	-- Example: Press Keybind which you use to run a callback when the key was pressed.
-
-	Default = "X", -- String as the name of the keybind (MB1, MB2 for mouse buttons)
+	Default = "X",
 
 	Mode = "Press",
-	WaitForCallback = false, -- Locks the keybind during the execution of Callback and OnChanged.
+	WaitForCallback = false,
 
-	Text = "Increase Number", -- Text to display in the keybind menu
+	Text = "Increase Number",
 
-	-- Occurs when the keybind is clicked, Value is always `true` for Press keybind.
 	Callback = function()
 		KeybindNumber = KeybindNumber + 1
 		print("[cb] Keybind clicked! Number increased to:", KeybindNumber)
 	end
 })
 
--- Long text label to demonstrate UI scrolling behaviour.
 local LeftGroupBox2 = Tabs.Main:AddLeftGroupbox("Groupbox #2")
 LeftGroupBox2:AddLabel(
 	"This label spans multiple lines! We're gonna run out of UI space...\nJust kidding! Scroll down!\n\n\nHello from below!",
 	true
 )
 
-local TabBox = Tabs.Main:AddRightTabbox() -- Add Tabbox on right side
+local TabBox = Tabs.Main:AddRightTabbox()
 
--- Anything we can do in a Groupbox, we can do in a Tabbox tab (AddToggle, AddSlider, AddLabel, etc etc...)
 local Tab1 = TabBox:AddTab("Tab 1")
 Tab1:AddToggle("Tab1Toggle", { Text = "Tab1 Toggle" })
+	:AddKeyPicker("KeyPicker", {
+	Default = "F",
+	SyncToggleState = true,
 
-local Tab2 = TabBox:AddTab("Tab 2", "carrot")
-Tab2:AddToggle("Tab2Toggle", { Text = "Tab2 Toggle" })
+	Mode = "Toggle",
 
-local Tab3 = TabBox:AddTab("", "carrot") -- You could leave it empty to toggle icon only
-Tab3:AddToggle("Tab3Toggle", { Text = "Tab3 Toggle" })
+	Text = "Lockdown mode",
+	NoUI = false,
+
+	Callback = function(Value)
+		print("[cb] Keybind clicked!", Value)
+	end,
+})
+
+local Tab2 = TabBox:AddTab("Tab 2", "anchor")
+Tab2:AddLabel("This is a UI Passthrough")
+
+local CustomFrame = Instance.new("Frame")
+CustomFrame.Size = UDim2.fromScale(1, 1)
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Padding = UDim.new(0, 8)
+UIListLayout.FillDirection = Enum.FillDirection.Vertical
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+UIListLayout.Parent = CustomFrame
+local TextLabel = Instance.new("TextLabel")
+TextLabel.AutomaticSize = Enum.AutomaticSize.XY
+TextLabel.BackgroundTransparency = 1
+TextLabel.TextSize = 10
+TextLabel.Text = "Hi, I'm UI Passtrough!"
+TextLabel.Parent = CustomFrame
+local Button = Instance.new("TextButton")
+Button.Size = UDim2.fromOffset(120, 35)
+Button.TextSize = 10
+Button.Text = "Click me!"
+Button.Parent = CustomFrame
+Button.MouseButton1Click:Connect(function()
+	print("You clicked a button inside a UI Passthrough!")
+end)
+
+Tab2:AddUIPassthrough("CustomUI", {
+    Instance = CustomFrame,
+    Height = 120,
+})
+
+Tab2:AddDivider("This is a divider")
+
+Tab2:AddLabel("Below is a viewport! You can interact with it!", true)
+
+Tab2:AddViewport("MyViewport", {
+    Object = Instance.new("Part"),
+    Camera = Instance.new("Camera"),
+    Interactive = true,
+    AutoFocus = true,
+})
+
+local Tab3 = TabBox:AddTab("", "armchair")
+Tab3:AddButton("Test Dialog", function()
+	local Dialog
+	Dialog = Window:AddDialog("DialogueIdx", {
+		Title = "Test Dialog",
+		Description = "This is a test dialog. Please confirm or cancel.",
+		AutoDismiss = true,
+		OutsideClickDismiss = true,
+		FooterButtons = {
+			Cancel = {
+				Title = "Cancel",
+				Variant = "Ghost",
+				Order = 1,
+				Callback = function()
+					print("Cancelled the dialog.")
+				end
+			},
+			Secondary = {
+				Title = "Secondary",
+				Variant = "Secondary",
+				Order = 2,
+				Callback = function()
+					print("Secondary action.")
+				end
+			},
+			Delete = {
+				Title = "Delete",
+				Variant = "Destructive",
+				Order = 3,
+				Callback = function()
+					print("Deleted the asset.")
+				end
+			},
+			Confirm = {
+				Title = "Confirm",
+				Variant = "Primary",
+				WaitTime = 3,
+				Order = 4,
+				Callback = function(self)
+					print("Confirmed the dialog.")
+				end
+			}
+		}
+	})
+	
+	Dialog:AddToggle("DisableSecondary", {
+		Text = "Disable Secondary Button",
+		Default = false,
+		Callback = function(value) 
+			Dialog:SetButtonDisabled("Secondary", value) 
+		end
+	})
+	
+	Dialog:AddInput("InputTest", {
+		Text = "Type something here:",
+		Callback = function(value) print("Typed:", value) end
+	})
+	
+	Dialog:AddToggle("SwapDeleteOrder", {
+		Text = "Send Delete to Right",
+		Default = false,
+		Callback = function(value) 
+			Dialog:SetButtonOrder("Delete", value and 5 or 3)
+		end
+	})
+end)
 
 Library:OnUnload(function()
 	print("Unloaded!")
 end)
 
--- Anything we can do in a Groupbox, we can do in a Key tab (AddToggle, AddSlider, AddLabel, etc etc...)
+local GroupBox = Tabs.SpecialTab:AddGroupbox("Groupbox", "apple")
+GroupBox:AddLabel("As you can see, in this tab the groupbox is fullsize!")
+GroupBox:AddLabel("Hi\nHi from second line\nHi from third line", true)
+
+GroupBox:AddToggle("EnableAudio", {
+    Text = "Enable Audio",
+    Default = false
+})
+ 
+local AudioSettings = GroupBox:AddDependencyBox()
+ 
+AudioSettings:AddSlider("Volume", {
+    Text = "Volume",
+    Default = 50,
+    Min = 0,
+    Max = 100,
+    Rounding = 0
+})
+ 
+AudioSettings:SetupDependencies({
+    { Toggles.EnableAudio, true },
+})
+
+GroupBox:AddDivider()
+
+GroupBox:AddLabel("This is a video!")
+
+local MyEpicVideo = GroupBox:AddVideo("EpicVideo", {
+    Video = "rbxassetid://5608321996",
+	Height = 300,
+})
+
+local Playing = false
+
+GroupBox:AddButton("Play/Pause", function()
+    local Playing = not MyEpicVideo.Playing
+    MyEpicVideo:SetPlaying(Playing)
+end)
+
+GroupBox:AddToggle("IsThisTheEnd", {
+    Text = "Is this the end?",
+    Default = false
+})
+ 
+local NoThisIsntTheEnd = GroupBox:AddDependencyGroupbox()
+
+NoThisIsntTheEnd:AddLabel("No, this isn't the end!")
+
+NoThisIsntTheEnd:AddButton("Click me, there's something special", function()
+	local Notification = Library:Notify({
+		Title = "Warning",
+		Description = "Your CPU is on fire. Your PC will explode in: 5",
+		Icon = "triangle-alert",
+		Steps = 5,
+	})
+	
+	for i = 1, 5 do
+		Notification:ChangeStep(i)
+		Notification:ChangeDescription("Your CPU is on fire. Your PC will explode in: " .. (5 - i))
+		task.wait(1)
+	end
+	
+	Notification:Destroy()
+	Instance.new("Explosion", Library.LocalPlayer.Character.HumanoidRootPart).Position = Library.LocalPlayer.Character.HumanoidRootPart.Position
+	Library.LocalPlayer.Character.Humanoid.Health:BreakJoints()
+end)
+ 
+NoThisIsntTheEnd:SetupDependencies({
+    { Toggles.IsThisTheEnd, true },
+})
+
 Tabs.Key:AddLabel({
 	Text = "Key: Banana",
 	DoesWrap = true,
@@ -661,7 +732,6 @@ Tabs.Key:AddLabel({
 })
 
 Tabs.Key:AddKeyBox(function(ReceivedKey)
-	-- KeyBox only takes the callback for the button, you need to implement your own key check inside the callback
 	local Success = ReceivedKey == "Banana"
 
 	print("Expected Key: Banana - Received Key:", ReceivedKey, "| Success:", Success)
@@ -672,12 +742,9 @@ Tabs.Key:AddKeyBox(function(ReceivedKey)
 	})
 end)
 
--- DraggableLabel
-
 Library:AddDraggableLabel("This is a Draggable Label")
 
--- UI Settings
-local MenuGroup = Tabs["UI Settings"]:AddLeftGroupbox("Menu", "wrench")
+local MenuGroup = Tabs.Settings:AddLeftGroupbox("Menu", "wrench")
 
 MenuGroup:AddToggle("KeybindMenuOpen", {
 	Default = Library.KeybindFrame.Visible,
@@ -736,41 +803,20 @@ MenuGroup:AddButton("Unload", function()
 	Library:Unload()
 end)
 
-Library.ToggleKeybind = Options.MenuKeybind -- Allows you to have a custom keybind for the menu
+Library.ToggleKeybind = Options.MenuKeybind
 
--- Addons:
--- SaveManager (Allows you to have a configuration system)
--- ThemeManager (Allows you to have a menu theme system)
-
--- Hand the library over to our managers
 ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
 
--- Ignore keys that are used by ThemeManager.
--- (we dont want configs to save themes, do we?)
 SaveManager:IgnoreThemeSettings()
 
--- Adds our MenuKeybind to the ignore list
--- (do you want each config to have a different menu key? probably not.)
 SaveManager:SetIgnoreIndexes({ "MenuKeybind" })
 
--- use case for doing it this way:
--- a script hub could have themes in a global folder
--- and game configs in a separate folder per game
 ThemeManager:SetFolder("MyScriptHub")
 SaveManager:SetFolder("MyScriptHub/specific-game")
-SaveManager:SetSubFolder("specific-place") -- if the game has multiple places inside of it (for example: DOORS)
--- you can use this to save configs for those places separately
--- The path in this script would be: MyScriptHub/specific-game/settings/specific-place
--- [ This is optional ]
+SaveManager:SetSubFolder("specific-place")
 
--- Builds our config menu on the right side of our tab
-SaveManager:BuildConfigSection(Tabs["UI Settings"])
+SaveManager:BuildConfigSection(Tabs.Settings)
+ThemeManager:AddThemeOptions(Tabs.Settings)
 
--- Builds our theme menu (with plenty of built in themes) on the left side
--- NOTE: you can also call ThemeManager:ApplyToGroupbox to add it to a specific groupbox
-ThemeManager:ApplyToTab(Tabs["UI Settings"])
-
--- You can use the SaveManager:LoadAutoloadConfig() to load a config
--- which has been marked to be one that auto loads!
 SaveManager:LoadAutoloadConfig()
