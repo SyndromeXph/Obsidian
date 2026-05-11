@@ -2991,7 +2991,7 @@ do
             end,
             1,
             nil,
-            Library.CornerElements
+            not Library.CornerElements
         )
         ColorMenu.List.Padding = UDim.new(0, 8)
         ColorPicker.ColorMenu = ColorMenu
@@ -3170,7 +3170,7 @@ do
         --// Context Menu \\--
         local ContextMenu = Library:AddContextMenu(Holder, UDim2.fromOffset(93, 0), function()
             return { Holder.AbsoluteSize.X + 1.5, 0.5 }
-        end, 1, nil, Library.CornerElements)
+        end, 1, nil, not Library.CornerElements)
         ColorPicker.ContextMenu = ContextMenu
         ContextMenu.List.Padding = UDim.new(0, 6)
         do
