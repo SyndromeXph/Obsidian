@@ -9796,13 +9796,15 @@ function Library:CreateWindow(WindowInfo)
                 Parent = ButtonContainer,
             })
             Library:AddOutline(TextBtn)
-            table.insert(
-                Library.Corners,
-                New("UICorner", { 
-                    CornerRadius = UDim.new(0, Library.CornerRadius), 
-                    Parent = TextBtn 
-                })
-            )
+            if Library.CornerElements then
+                table.insert(
+                    Library.Corners,
+                    New("UICorner", { 
+                        CornerRadius = UDim.new(0, Library.CornerRadius), 
+                        Parent = TextBtn 
+                    })
+                )
+            end
 
             local _BtnPadding = New("UIPadding", {
                 PaddingLeft = UDim.new(0, 15),
@@ -9842,13 +9844,15 @@ function Library:CreateWindow(WindowInfo)
                     ZIndex = 2,
                     Parent = TextBtn,
                 })
-                table.insert(
-                    Library.Corners,
-                    New("UICorner", { 
-                        CornerRadius = UDim.new(0, Library.CornerRadius), 
-                        Parent = ProgressBar 
-                    })
-                )
+                if Library.CornerElements then
+                    table.insert(
+                        Library.Corners,
+                        New("UICorner", { 
+                            CornerRadius = UDim.new(0, Library.CornerRadius), 
+                            Parent = ProgressBar 
+                        })
+                    )
+                end
             end
 
             local IsActive = WaitTime <= 0
