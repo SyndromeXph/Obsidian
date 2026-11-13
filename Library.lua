@@ -276,7 +276,7 @@ local Library = {
     --// Scheme \\--
     IsLightTheme = false,
     Scheme = {
-        BackgroundColor = Color3.fromRGB(16, 18, 28),
+        BackgroundColor = Color3.fromRGB(24, 10, 44),
         MainColor = Color3.fromRGB(28, 30, 44),
         AccentColor = Color3.fromRGB(125, 85, 255),
         OutlineColor = Color3.fromRGB(120, 132, 168),
@@ -316,22 +316,21 @@ local Library = {
     Notify = nil, Toggle = nil -- we love luau lsp
 }
 
---// 紫黑风格渐变（标题 / 底栏 / 通知进度条 共用） \\--
+--// 紫到暗紫渐变（标题 / 底栏 / 通知进度条 共用） \\--
 local VioletColor = Color3.fromRGB(148, 0, 211)
-local SoftVioletColor = Color3.fromRGB(186, 85, 255)
-local PureBlackColor = Color3.new(0, 0, 0)
+local DarkPurpleColor = Color3.fromRGB(58, 0, 112)
 
 local function MakeVioletBlackGradient(Shift: number): ColorSequence
     local t = Shift % 1
-    local c1 = PureBlackColor:Lerp(VioletColor, (math.sin(t * math.pi * 2) + 1) * 0.5)
-    local c2 = SoftVioletColor:Lerp(PureBlackColor, (math.sin(t * math.pi * 2 + 1.2) + 1) * 0.5)
-    local c3 = VioletColor:Lerp(PureBlackColor, (math.sin(t * math.pi * 2 + 2.4) + 1) * 0.5)
-    local c4 = PureBlackColor:Lerp(SoftVioletColor, (math.sin(t * math.pi * 2 + 3.6) + 1) * 0.5)
+    local Wave1 = (math.sin(t * math.pi * 2) + 1) * 0.5
+    local Wave2 = (math.sin(t * math.pi * 2 + 1.6) + 1) * 0.5
+    local Wave3 = (math.sin(t * math.pi * 2 + 3.2) + 1) * 0.5
+    local Wave4 = (math.sin(t * math.pi * 2 + 4.8) + 1) * 0.5
     return ColorSequence.new({
-        ColorSequenceKeypoint.new(0, c1),
-        ColorSequenceKeypoint.new(0.33, c2),
-        ColorSequenceKeypoint.new(0.66, c3),
-        ColorSequenceKeypoint.new(1, c4),
+        ColorSequenceKeypoint.new(0, DarkPurpleColor:Lerp(VioletColor, Wave1)),
+        ColorSequenceKeypoint.new(0.33, VioletColor:Lerp(DarkPurpleColor, Wave2)),
+        ColorSequenceKeypoint.new(0.66, DarkPurpleColor:Lerp(VioletColor, Wave3)),
+        ColorSequenceKeypoint.new(1, VioletColor:Lerp(DarkPurpleColor, Wave4)),
     })
 end
 
